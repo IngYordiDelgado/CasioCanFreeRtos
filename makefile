@@ -68,7 +68,7 @@ VPATH = $(SRC_PATHS)
 INCLS = $(addprefix -I ,$(INC_PATHS))
 
 #Instrucciones de compilacion
-all : build $(TARGET)
+all : build format lint $(TARGET)
 
 $(TARGET) : $(addprefix Build/, $(TARGET).elf)
 	$(TOOLCHAIN)-objcopy -Oihex $< Build/$(TARGET).hex
@@ -89,7 +89,7 @@ build :
 
 -include $(DEPS)
 
-.PHONY : clean flash open debug docs lint format runner
+.PHONY : clean flash open debug docs lint format publish
 
 #borrar archivos generados
 clean :
@@ -107,11 +107,6 @@ open :
 #---launch a debug session, NOTE: is mandatory to previously open a debug server session-----------
 debug :
 	arm-none-eabi-gdb Build/$(TARGET).elf -iex "set auto-load safe-path /"
-
-#---Genrete project documentation with doxygen-----------------------------------------------------
-docs :
-	doxygen .doxyfile
-	firefox Build/doxygen/html/index.html
 
 #---Run Static analysis
 lint :
