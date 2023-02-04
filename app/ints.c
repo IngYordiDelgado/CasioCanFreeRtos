@@ -20,8 +20,8 @@
  * necesary
  *
  */
-void NMI_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no need
-                            for external linkage */
+/* cppcheck-suppress misra-c2012-8.4 ; there is no need for external linkage */
+void NMI_Handler( void )
 {
 }
 
@@ -35,32 +35,10 @@ void NMI_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no need
  * necesary
  *
  */
-void HardFault_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no
-                                  need for external linkage */
+/* cppcheck-suppress misra-c2012-8.4 ; there is no need for external linkage */
+void HardFault_Handler( void )
 {
     assert_param( 0u );
-}
-
-/**
- * @brief   **SVC Vector**
- *
- * The vector is not in use since we are not using any RTOS
- *
- */
-void SVC_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no need
-                            for external linkage */
-{
-}
-
-/**
- * @brief   **PendSV Vector**
- *
- * The vector is not in use since we are not using any RTOS
- *
- */
-void PendSV_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no
-                               need for external linkage */
-{
 }
 
 /**
@@ -71,8 +49,8 @@ void PendSV_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no
  * every millisencond passed
  *
  */
-void SysTick_Handler( void ) /* cppcheck-suppress misra-c2012-8.4 ; there is no
-                                need for external linkage */
+/* cppcheck-suppress misra-c2012-8.4 ; there is no need for external linkage */
+void SysTick_Handler( void )
 {
     HAL_IncTick( );
 }

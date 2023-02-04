@@ -2,8 +2,9 @@
 TARGET = casiocan
 #Archivos de la aplicacion
 ASRCS  = main.c ints.c msps.c
-#Archivos de la libreria HAL
-LSRCS  = startup_stm32g0b1xx.s system_stm32g0xx.c stm32g0xx_hal.c stm32g0xx_hal_cortex.c
+#Archivos de la libreria HAL and RTOS
+LSRCS  = port.c heap_1.c list.c queue.c tasks.c timers.c
+LSRCS += startup_stm32g0b1xx.s system_stm32g0xx.c stm32g0xx_hal.c stm32g0xx_hal_cortex.c
 LSRCS += stm32g0xx_hal_rcc.c stm32g0xx_hal_flash.c stm32g0xx_hal_gpio.c
 #archivo linker a usar
 LINKER = linker.ld
@@ -13,11 +14,13 @@ SYMBOLS = -DSTM32G0B1xx -DUSE_HAL_DRIVER
 SRC_PATHS  = app
 SRC_PATHS += cmsisg0/startups
 SRC_PATHS += halg0/Src
+SRC_PATHS += rtos
 #direcotrios con archivos .h
 INC_PATHS  = app
 INC_PATHS += cmsisg0/core
 INC_PATHS += cmsisg0/registers
 INC_PATHS += halg0/Inc
+INC_PATHS += rtos/include
 
 TOOLCHAIN = arm-none-eabi
 CPU = -mcpu=cortex-m0plus -mthumb -mfloat-abi=soft

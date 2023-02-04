@@ -12,6 +12,4 @@
 
 extern void NMI_Handler( void );
 extern void HardFault_Handler( void );
-extern void SVC_Handler( void );
-extern void PendSV_Handler( void );
 extern void SysTick_Handler( void );
