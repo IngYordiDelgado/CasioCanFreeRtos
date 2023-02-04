@@ -1,5 +1,5 @@
 /**
- * @file    app_bsp.h
+ * @file    bsp.h
  * @brief   **CasioCAN Global definitions and symbols**
  *
  * This is where cross file symbols are place, if more than one file needs any of the symbols

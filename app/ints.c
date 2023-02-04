@@ -1,5 +1,5 @@
 /**
- * @file    app_ints.h
+ * @file    ints.h
  * @brief   **CasioCAN interrupt vectors**
  *
  * This where the application interrupt vector are defined. This shall be the only place to do this

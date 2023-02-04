@@ -1,9 +1,10 @@
 #Nombre del proyecto
-TARGET = temp
-#Archivos a compilar
-SRCS  = main.c ints.c msps.c startup_stm32g0b1xx.s system_stm32g0xx.c 
-SRCS += stm32g0xx_hal.c stm32g0xx_hal_cortex.c stm32g0xx_hal_rcc.c stm32g0xx_hal_flash.c
-SRCS += stm32g0xx_hal_gpio.c
+TARGET = casiocan
+#Archivos de la aplicacion
+ASRCS  = main.c ints.c msps.c
+#Archivos de la libreria HAL
+LSRCS  = startup_stm32g0b1xx.s system_stm32g0xx.c stm32g0xx_hal.c stm32g0xx_hal_cortex.c
+LSRCS += stm32g0xx_hal_rcc.c stm32g0xx_hal_flash.c stm32g0xx_hal_gpio.c
 #archivo linker a usar
 LINKER = linker.ld
 #Simbolos gloobales del programa (#defines globales)
@@ -58,6 +59,7 @@ LNFLAGS += --platform=unix32    # lint againt a unix32 platform, but we are usin
 LNFLAGS += --cppcheck-build-dir=Build/checks
 
 #substituccion de prefijos y postfijos 
+SRCS = $(ASRCS) $(LSRCS)
 OBJS = $(SRCS:%.c=Build/obj/%.o)
 OBJS := $(OBJS:%.s=Build/obj/%.o)
 
@@ -87,6 +89,8 @@ build :
 
 -include $(DEPS)
 
+.PHONY : clean flash open debug docs lint format runner
+
 #borrar archivos generados
 clean :
 	rm -rf Build
@@ -113,3 +117,23 @@ docs :
 lint :
 	mkdir -p Build/checks
 	cppcheck --addon=misra.json --suppressions-list=.msupress $(LNFLAGS) app
+
+format :
+	clang-format -style=file -i $(addprefix app/,$(ASRCS)) $(addprefix utest/,$(TSRCS))
+
+#---Genrete project documentation with doxygen-----------------------------------------------------
+docs :
+	mkdir -p Build/doxygen 
+	mkdir -p Build/sphinx 
+	mkdir -p Build/sphinx/_template 
+	mkdir -p Build/sphinx/_static 
+	mkdir -p Build/sphinx/_build
+	doxygen .doxyfile
+	sphinx-build -b html docs Build/sphinx/_build -c ./ -W
+	firefox Build/sphinx/_build/index.html
+
+publish :
+	mkdir -p Build/doxygen 
+	mkdir -p Build/sphinx Build/sphinx/_template Build/sphinx/_static Build/sphinx/_build
+	doxygen .doxyfile
+	sphinx-build -b confluence docs Build/sphinx/_build/confluence -E -a -c ./ -W

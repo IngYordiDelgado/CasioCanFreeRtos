@@ -1,5 +1,5 @@
 /**
- * @file    app_msps.h
+ * @file    msps.h
  * @brief   **CasioCAN peripheral pin configuration**
  *
  * This is where the pheriperals port configuration is set, every peripheral in use calls a function

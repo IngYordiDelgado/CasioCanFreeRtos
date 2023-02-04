@@ -11,8 +11,6 @@ with a serial port interface and a LCD
 
 To build proyect just type `make build` and then to flash the board `make flash` it is
 
-.. uml:: uml/test.plantuml
-
 .
 
 .. toctree::
