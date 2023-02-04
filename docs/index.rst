@@ -19,6 +19,6 @@ To build proyect just type `make build` and then to flash the board `make flash`
     :maxdepth: 1
     :caption: Contents:
 
-    app_bsp
-    app_ints
-    app_msps
+    bsp
+    ints
+    msps

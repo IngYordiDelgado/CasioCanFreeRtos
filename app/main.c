@@ -10,7 +10,8 @@
  *          doxygen runs by typing "make docs", index page is generated in
  *          Build/doxigen/html/index.html
  */
-#include "app_bsp.h"
+#include "stm32g0xx.h"
+#include <stdint.h>
 
 /**
  * @brief   **Application entry point**
