@@ -2,13 +2,12 @@
  * @file    main.c
  * @brief   **Template Application entry point**
  *
- * The main file is the entry point of the application or any user code, please
- * provide the proper description of this file according to your own
- * implementation This Demo app only blinks an LED connected to PortA Pin 5
+ * The main file is the entry point of the application or any user code, please provide the proper 
+ * description of this file according to your own implementation This Demo app only blinks an LED 
+ * connected to PortA Pin 5
  *
- * @note    Only the files inside folder app will be take them into account when
- * the doxygen runs by typing "make docs", index page is generated in
- *          Build/doxigen/html/index.html
+ * @note    Only the files inside folder app will be take them into account when the doxygen runs 
+ *          by typing "make docs", index page is generated in Build/doxigen/html/index.html
  */
 #include "stm32g0xx.h"
 #include <stdint.h>
@@ -16,8 +15,7 @@
 /**
  * @brief   **Application entry point**
  *
- * Ptovide the proper description for function main according to your own
- * implementation
+ * Ptovide the proper description for function main according to your own implementation
  *
  * @retval  None
  */
