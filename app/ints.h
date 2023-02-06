@@ -8,7 +8,13 @@
  *
  * Vector definitions as week functions can be found at file **startup_stm32g0b1xx.s**
  */
+#ifndef INTS_H_
+#define INTS_H_
 
-extern void NMI_Handler( void );
-extern void HardFault_Handler( void );
-extern void SysTick_Handler( void );
+/*these functions are only to reference their implementation in the corresponding .rst file, should 
+not be included anywhere in the project*/
+void NMI_Handler( void );
+void HardFault_Handler( void );
+void SysTick_Handler( void );
+
+#endif

@@ -24,22 +24,6 @@ Hard Fault Handler
 
 .
 
-SVC Handler
------------
-
-.. doxygenfunction:: SVC_Handler
-    :project: CasiocanPlus
-
-.
-
-Pend SV Handler
----------------
-
-.. doxygenfunction:: PendSV_Handler
-    :project: CasiocanPlus
-
-.
-
 System Tick Handler
 -------------------
 

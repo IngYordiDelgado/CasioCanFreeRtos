@@ -34,6 +34,7 @@ CFLAGS += -fdata-sections            # Create a separate data section
 CFLAGS += -fno-builtin               # Don't recognize built-in functions that do not begin with ‘__builtin_’ as prefix
 CFLAGS += -std=c99                   # Comply with C11
 CFLAGS += -Wall                      # Be anal Enable All Warnings
+CFLAGS += -Werror                    # Threat all warnings as errors
 CFLAGS += -pedantic                  # Be extra anal More ANSI Checks
 CFLAGS += -Wstrict-prototypes        # Warn if a function is declared or defined without specifying the argument types
 CFLAGS += -fsigned-char              # char is treated as signed
