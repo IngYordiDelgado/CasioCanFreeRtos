@@ -10,4 +10,3 @@ Main
 
 .. doxygenfunction:: main
     :project: CasiocanPlus
-

@@ -2,12 +2,18 @@
  * @file    main.c
  * @brief   **CasioCAN++ Application entry point**
  *
- * The main file is the entry point of the application or any user code, please provide the proper
- * description of this file according to your own implementation This Demo app only blinks an LED
- * connected to PortA Pin 5
+ * The main file is the entry point of the application and only has the RTOs mechanism required
+ * to admnistrate the application tasks to run, the actual portion of the application is aplitted
+ * into five main tasks
  *
- * @note    Only the files inside folder app will be take them into account when the doxygen runs
- *          by typing "make docs", index page is generated in Build/doxigen/html/index.html
+ * - **CLock**.- In charge of controlling the internal time and date
+ * - **Serial**.- In chanrge of receive and transmit the CAN messages
+ * - **Display**.- Only manage to display the infromation required to rthe user like time and date
+ * - **Heartbeat**.- Signaling lights to feedback the user the application is running healthy
+ * - **Watchdog**.- Trigger a software reset in cas of a freeze event
+ *
+ * All of these tasks are grouped into three major operative systems task configured with hard
+ * deadlines of 10, 50 and 100ms
  */
 #include "bsp.h"
 
@@ -51,11 +57,11 @@ int main( void )
  * @brief   **10 millisecond task**
  *
  * Ten milliseconds periodic task with no return option, application should place here all tasks
- * required to run every 10ms at the highest priority keeping in mind their execution shall be as 
+ * required to run every 10ms at the highest priority keeping in mind their execution shall be as
  * short as possible. The task is called by the operative system once its kernel is running
- * 
+ *
  * task to run:
- *  - Serial task  
+ *  - Serial task
  *
  * @param[in] Parameters pointer to optional paramaters used to pass the task period time in ms
  */
@@ -75,13 +81,13 @@ static void Task_10ms( void *Parameters )
  * @brief   **50 millisecond task**
  *
  * Fifthy milliseconds periodic task with no return option, application should place here all tasks
- * required to run every 50ms at medium priority keeping in mind their execution shall be as 
+ * required to run every 50ms at medium priority keeping in mind their execution shall be as
  * short as possible. The task is called by the operative system once its kernel is running
- * 
+ *
  * task to run:
  *  - Clock task
  *  - Watchdog task
- *  - Heartbeat task  
+ *  - Heartbeat task
  *
  * @param[in] Parameters pointer to optional paramaters used to pass the task period time in ms
  */
@@ -101,11 +107,11 @@ static void Task_50ms( void *Parameters )
  * @brief   **100 millisecond task**
  *
  * Hundred milliseconds periodic task with no return option, application should place here all tasks
- * required to run every 100ms at the lowest priority keeping in mind their execution can long but no 
+ * required to run every 100ms at the lowest priority keeping in mind their execution can long but no
  * more then its periodicity. The task is called by the operative system once its kernel is running
- * 
+ *
  * task to run:
- *  - Display task  
+ *  - Display task
  *
  * @param[in] Parameters pointer to optional paramaters used to pass the task period time in ms
  */
@@ -125,7 +131,7 @@ static void Task_100ms( void *Parameters )
  * @brief   **Background task**
  *
  * This function is called continuously by the background task when no other task is running
- * a future algorithm to meassure CPU ans stack utilization can be implemented. 
+ * a future algorithm to meassure CPU ans stack utilization can be implemented.
  *
  * @note any code place here shall be at the lowest priority since always will be preempted by the tasks
  */
@@ -137,11 +143,11 @@ void vApplicationIdleHook( void )
 /**
  * @brief   **10 milliseoncd task**
  *
- * configSUPPORT_STATIC_ALLOCATION is set to 1, so the application must provide an implementation 
+ * configSUPPORT_STATIC_ALLOCATION is set to 1, so the application must provide an implementation
  * of vApplicationGetIdleTaskMemory() to provide the memory that is used by the Idle task. This is
  * going to be achieved declaring a static StaticTask_t TCB and its corresponding static array
  *
- * @param[out] ppxIdleTaskTCBBuffer pointer to the StaticTask_t structure in which the Idle task's 
+ * @param[out] ppxIdleTaskTCBBuffer pointer to the StaticTask_t structure in which the Idle task's
  *                                  state will be stored
  * @param[out] ppxIdleTaskStackBuffer array that will be used as the Idle task's stack.
  * @param[out] pulIdleTaskStackSize array size that will be used as the Idle task's stack.
@@ -157,12 +163,12 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 /**
  * @brief   **10 milliseoncd task**
  *
- * configSUPPORT_STATIC_ALLOCATION and configUSE_TIMERS are both set to 1, so the application must 
- * provide an implementation of vApplicationGetTimerTaskMemory() to provide the memory that is used 
- * by the Timer service task. This is going to be achieved declaring a static StaticTask_t TCB and 
+ * configSUPPORT_STATIC_ALLOCATION and configUSE_TIMERS are both set to 1, so the application must
+ * provide an implementation of vApplicationGetTimerTaskMemory() to provide the memory that is used
+ * by the Timer service task. This is going to be achieved declaring a static StaticTask_t TCB and
  * its corresponding static array
  *
- * @param[out] ppxTimerTaskTCBBuffer pointer to the StaticTask_t structure in which the Timer task's 
+ * @param[out] ppxTimerTaskTCBBuffer pointer to the StaticTask_t structure in which the Timer task's
  *                                  state will be stored
  * @param[out] ppxTimerTaskStackBuffer array that will be used as the Timer task's stack.
  * @param[out] pulTimerTaskStackSize array size that will be used as the Timer task's stack.
