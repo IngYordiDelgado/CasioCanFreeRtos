@@ -17,6 +17,17 @@
  */
 #include "bsp.h"
 
+/**
+  * @defgroup Task-Stacks RTOS task stack size in words (4 bytes)
+  @{ */
+#define TASK_10MS_STACK_SIZE   128 /*!< 10ms task stack size (512 bytes) */
+#define TASK_50MS_STACK_SIZE   128 /*!< 50ms task stack size (512 bytes) */
+#define TASK_100MS_STACK_SIZE  128 /*!< 100ms task stack size (512 bytes) */
+#define TASK_IDLE_STACK_SIZE   128 /*!< idle task stack size (512 bytes) */
+#define TASK_TIMERS_STACK_SIZE 128 /*!< timers task stack size (512 bytes) */
+/**
+  @} */
+
 static void Task_10ms( void *Parameters );
 static void Task_50ms( void *Parameters );
 static void Task_100ms( void *Parameters );
@@ -45,11 +56,34 @@ static void Task_100ms( void *Parameters );
  */
 int main( void )
 {
-    /*Dummy calls to allow compilation*/
-    Task_10ms( NULL );
-    Task_50ms( NULL );
-    Task_100ms( NULL );
+    /*Task control blocks*/
+    static StaticTask_t StackPtr_10ms;
+    static StaticTask_t StackPtr_50ms;
+    static StaticTask_t StackPtr_100ms;
 
+    /*Stack buffers*/
+    static StackType_t StackBuffer_10ms[ TASK_10MS_STACK_SIZE ];
+    static StackType_t StackBuffer_50ms[ TASK_50MS_STACK_SIZE ];
+    static StackType_t StackBuffer_100ms[ TASK_100MS_STACK_SIZE ];
+
+    /*Stack hard deadlines in milliseconds*/
+    static uint32_t Period_10ms  = 10u;
+    static uint32_t Period_50ms  = 50u;
+    static uint32_t Period_100ms = 100u;
+
+    /*Initialize their STM32CubeG0 library*/
+    HAL_Init( );
+
+    /*Register tasks to run*/
+    Task_CreateStatic( Task_10ms, "10ms task", TASK_10MS_STACK_SIZE, (void *)&Period_10ms, 4u, StackBuffer_10ms, &StackPtr_10ms );
+    Task_CreateStatic( Task_50ms, "50ms task", TASK_50MS_STACK_SIZE, (void *)&Period_50ms, 3u, StackBuffer_50ms, &StackPtr_50ms );
+    Task_CreateStatic( Task_100ms, "100ms task", TASK_100MS_STACK_SIZE, (void *)&Period_100ms, 2u, StackBuffer_100ms, &StackPtr_100ms );
+
+    /*Run the scheduler*/
+    Task_StartScheduler( );
+
+    /*Code should never reach this point, otherwise th rtos has been failed due to stack overflow
+    or a missconfiguration*/
     return 0u;
 }
 
@@ -67,13 +101,16 @@ int main( void )
  */
 static void Task_10ms( void *Parameters )
 {
-    (void)Parameters;
+    TickType_t LastWakeTime;
+    const TickType_t SleepTime = pdMS_TO_TICKS( *(TickType_t *)Parameters );
 
-    /*Place here any task intilization*/
+    /*place here application task initilization*/
+    LastWakeTime = Task_GetTickCount( );
 
     for( ;; )
     {
-        /*Place here any task periodic rutine*/
+        /*Place here application periodic tasks*/
+        Task_DelayUntil( &LastWakeTime, SleepTime );
     }
 }
 
@@ -93,13 +130,16 @@ static void Task_10ms( void *Parameters )
  */
 static void Task_50ms( void *Parameters )
 {
-    (void)Parameters;
+    TickType_t LastWakeTime;
+    const TickType_t SleepTime = pdMS_TO_TICKS( *(TickType_t *)Parameters );
 
-    /*Place here any task intilization*/
+    /*place here application task initilization*/
+    LastWakeTime = Task_GetTickCount( );
 
     for( ;; )
     {
-        /*Place here any task periodic rutine*/
+        /*Place here application periodic tasks*/
+        Task_DelayUntil( &LastWakeTime, SleepTime );
     }
 }
 
@@ -117,13 +157,16 @@ static void Task_50ms( void *Parameters )
  */
 static void Task_100ms( void *Parameters )
 {
-    (void)Parameters;
+    TickType_t LastWakeTime;
+    const TickType_t SleepTime = pdMS_TO_TICKS( *(TickType_t *)Parameters );
 
-    /*Place here any task intilization*/
+    /*place here application task initilization*/
+    LastWakeTime = Task_GetTickCount( );
 
     for( ;; )
     {
-        /*Place here any task periodic rutine*/
+        /*Place here application periodic tasks*/
+        Task_DelayUntil( &LastWakeTime, SleepTime );
     }
 }
 
@@ -155,9 +198,19 @@ void vApplicationIdleHook( void )
 /* cppcheck-suppress misra-c2012-8.4 ; its external linkage is declared at RTOS library */
 void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackType_t **ppxIdleTaskStackBuffer, uint32_t *pulIdleTaskStackSize )
 {
-    (void)ppxIdleTaskTCBBuffer;
-    (void)ppxIdleTaskStackBuffer;
-    (void)pulIdleTaskStackSize;
+    static StaticTask_t xIdleTaskTCB;
+    /* cppcheck-suppress misra-c2012-18.8 ; This is not a variable it is a definition constant */
+    static StackType_t uxIdleTaskStack[ TASK_IDLE_STACK_SIZE ];
+
+    /* Pass out a pointer to the StaticTask_t structure in which the Idle task's state will be stored. */
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+
+    /* Pass out the array that will be used as the Idle task's stack. */
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+
+    /* Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer. Note that, as the array
+    is necessarily of type StackType_t, configMINIMAL_STACK_SIZE is specified in words, not bytes. */
+    *pulIdleTaskStackSize = TASK_IDLE_STACK_SIZE;
 }
 
 /**
@@ -176,7 +229,17 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer, StackTy
 /* cppcheck-suppress misra-c2012-8.4 ; its external linkage is declared at RTOS library */
 void vApplicationGetTimerTaskMemory( StaticTask_t **ppxTimerTaskTCBBuffer, StackType_t **ppxTimerTaskStackBuffer, uint32_t *pulTimerTaskStackSize )
 {
-    (void)ppxTimerTaskTCBBuffer;
-    (void)ppxTimerTaskStackBuffer;
-    (void)pulTimerTaskStackSize;
+    static StaticTask_t xTimerTaskTCB;
+    /* cppcheck-suppress misra-c2012-18.8 ; This is not a variable it is a definition constant */
+    static StackType_t uxTimerTaskStack[ TASK_TIMERS_STACK_SIZE ];
+
+    /* Pass out a pointer to the StaticTask_t structure in which the Timer task's state will be stored. */
+    *ppxTimerTaskTCBBuffer = &xTimerTaskTCB;
+
+    /* Pass out the array that will be used as the Timer task's stack. */
+    *ppxTimerTaskStackBuffer = uxTimerTaskStack;
+
+    /* Pass out the size of the array pointed to by *ppxTimerTaskStackBuffer. Note that, as the array
+    is necessarily of type StackType_t, configTIMER_TASK_STACK_DEPTH is specified in words, not bytes. */
+    *pulTimerTaskStackSize = TASK_TIMERS_STACK_SIZE;
 }
