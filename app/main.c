@@ -6,11 +6,11 @@
  * to admnistrate the application tasks to run, the actual portion of the application is aplitted
  * into five main tasks
  *
- * - **CLock**.- In charge of controlling the internal time and date
- * - **Serial**.- In chanrge of receive and transmit the CAN messages
- * - **Display**.- Only manage to display the infromation required to rthe user like time and date
+ * - **Clock**.- In charge of controlling the internal time and date
+ * - **Serial**.- In change of receive and transmit the CAN messages
+ * - **Display**.- Only manage to display the information required to the user like time and date
  * - **Heartbeat**.- Signaling lights to feedback the user the application is running healthy
- * - **Watchdog**.- Trigger a software reset in cas of a freeze event
+ * - **Watchdog**.- Trigger a software reset in case of a freeze event
  *
  * All of these tasks are grouped into three major operative systems task configured with hard
  * deadlines of 10, 50 and 100ms
@@ -24,7 +24,7 @@ static void Task_100ms( void *Parameters );
 /**
  * @brief   **Application entry point**
  *
- * The function will mainly intilize the two third party stacks in use, the **STM32CubeG0** HAL library
+ * The function will mainly initialize the two third party stacks in use, the **STM32CubeG0** HAL library
  * and the **FreeRTOS** operative system, also it is the place to register the tasks to run in the
  * operative system with they required parameter:
  *
@@ -32,7 +32,7 @@ static void Task_100ms( void *Parameters );
  *  - 50ms task   512 bytes of stack  Medium priority
  *  - 100ms task  512 bytes of stack  Lowest priority
  *
- * The Queue to comunicate bwtween more than one task shall also be created here, such as:
+ * The Queue to comunicate between more than one task shall also be created here, such as:
  *
  *  - Clock Queue Comunicates Serial to Clock task
  *  - Clock Queue Comunicates Clock to Display task
@@ -131,7 +131,7 @@ static void Task_100ms( void *Parameters )
  * @brief   **Background task**
  *
  * This function is called continuously by the background task when no other task is running
- * a future algorithm to meassure CPU ans stack utilization can be implemented.
+ * a future algorithm to meassure CPU and stack utilization can be implemented.
  *
  * @note any code place here shall be at the lowest priority since always will be preempted by the tasks
  */
