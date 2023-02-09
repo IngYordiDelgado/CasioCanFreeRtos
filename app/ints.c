@@ -41,8 +41,8 @@ void HardFault_Handler( void )
  *
  * The program will jump here every millisecond and increments a global variable used internally by
  * as system tick by the HAL library, which helps the program to keep tracking of every millisencond
- * passed. also the RTOS will use this same interrupt in its own way to keep traking of the ticks
- * for their internall mechanism, to switch task and count milliseconds
+ * passed. also the RTOS will use this same interrupt in its own way to keep tracking of the ticks
+ * for their internal mechanism, to switch task and count milliseconds
  */
 /* cppcheck-suppress misra-c2012-8.4 ; there is no need for external linkage */
 void SysTick_Handler( void )
