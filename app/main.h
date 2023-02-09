@@ -3,7 +3,7 @@
  * @brief   **CasioCAN++ Application entry point**
  *
  * The main file is the entry point of the application and only has the RTOs mechanism required
- * to admnistrate the application tasks to run, the actual portion of the application is aplitted
+ * to admnistrate the application tasks to run, the actual portion of the application is splitted
  * into five main tasks
  *
  * - **CLock**.- In charge of controlling the internal time and date
