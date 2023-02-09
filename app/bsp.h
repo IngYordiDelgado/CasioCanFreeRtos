@@ -10,6 +10,7 @@
 
     #include "stm32g0xx.h"
     #include <stdint.h>
+    #include "FreeRTOS.h"
 
 #endif
 
