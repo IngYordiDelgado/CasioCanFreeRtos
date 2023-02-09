@@ -5,7 +5,9 @@ ASRCS  = main.c ints.c msps.c
 #Archivos de la libreria HAL and RTOS
 LSRCS  = port.c heap_1.c list.c queue.c tasks.c timers.c
 LSRCS += startup_stm32g0b1xx.s system_stm32g0xx.c stm32g0xx_hal.c stm32g0xx_hal_cortex.c
-LSRCS += stm32g0xx_hal_rcc.c stm32g0xx_hal_flash.c stm32g0xx_hal_gpio.c
+LSRCS += stm32g0xx_hal_rcc.c stm32g0xx_hal_flash.c stm32g0xx_hal_gpio.c 
+LSRCS += stm32g0xx_hal_fdcan.c stm32g0xx_hal_rcc_ex.c stm32g0xx_hal_pwr.c
+LSRCS += stm32g0xx_hal_spi.c stm32g0xx_hal_spi_ex.c
 #archivo linker a usar
 LINKER = linker.ld
 #Simbolos gloobales del programa (#defines globales)
