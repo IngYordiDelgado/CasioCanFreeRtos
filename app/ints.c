@@ -47,5 +47,11 @@ void HardFault_Handler( void )
 /* cppcheck-suppress misra-c2012-8.4 ; there is no need for external linkage */
 void SysTick_Handler( void )
 {
+    /*Run the RTOS tick rutine only if the scheduler is running */
+    if( Task_GetSchedulerState( ) != taskSCHEDULER_NOT_STARTED )
+    {
+        Task_SysTickHandler( );
+    }
+    /*Increment the STM32CubeG0 library tick*/
     HAL_IncTick( );
 }
