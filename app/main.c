@@ -20,13 +20,47 @@
 /**
   * @defgroup Task-Stacks RTOS task stack size in words (4 bytes)
   @{ */
-#define TASK_10MS_STACK_SIZE   128 /*!< 10ms task stack size (512 bytes) */
-#define TASK_50MS_STACK_SIZE   128 /*!< 50ms task stack size (512 bytes) */
-#define TASK_100MS_STACK_SIZE  128 /*!< 100ms task stack size (512 bytes) */
-#define TASK_IDLE_STACK_SIZE   128 /*!< idle task stack size (512 bytes) */
-#define TASK_TIMERS_STACK_SIZE 128 /*!< timers task stack size (512 bytes) */
+#define TASK_10MS_STACK_SIZE      128 /*!< 10ms task stack size (512 bytes) */
+#define TASK_50MS_STACK_SIZE      128 /*!< 50ms task stack size (512 bytes) */
+#define TASK_100MS_STACK_SIZE     128 /*!< 100ms task stack size (512 bytes) */
+#define TASK_IDLE_STACK_SIZE      128 /*!< idle task stack size (512 bytes) */
+#define TASK_TIMERS_STACK_SIZE    128 /*!< timers task stack size (512 bytes) */
 /**
   @} */
+
+/**
+  * @defgroup Queue-Buffers Queue buffer sizes
+  @{ */
+#define CLOCK_MSG_BUFFER_SIZE     50u  /*!< Clock queue Buffer size */
+#define DISPLAY_MSG_BUFFER_SIZE   100u /*!< Display queue Buffer size */
+#define HEARTBEAT_MSG_BUFFER_SIZE 10u  /*!< Heartbeat queue Buffer size */
+/**
+  @} */
+
+/**
+ * @brief  Queue to communicate messages between serial and clock task
+ *
+ * @todo remove the misra suppresion once the vraibale is used in another file
+ */
+/* cppcheck-suppress misra-c2012-8.7 ; eventualy this variable will be used somewhere else*/
+QueueHandle_t ClockQueue;
+
+/**
+ * @brief  Queue to communicate messages between clock and display task
+ *
+ * @todo remove the misra suppresion once the vraibale is used in another file
+ */
+/* cppcheck-suppress misra-c2012-8.7 ; eventualy this variable will be used somewhere else */
+QueueHandle_t DisplayQueue;
+
+/**
+ * @brief  Queue to communicate messages between serial and heartbeat task
+ *
+ * @todo remove the misra suppresion once the vraibale is used in another file
+ */
+/* cppcheck-suppress misra-c2012-8.7 ; eventualy this variable will be used somewhere else */
+QueueHandle_t HeartbeatQueue;
+
 
 static void Task_10ms( void *Parameters );
 static void Task_50ms( void *Parameters );
@@ -71,8 +105,25 @@ int main( void )
     static uint32_t Period_50ms  = 50u;
     static uint32_t Period_100ms = 100u;
 
+    /*Queue for inter-task comunication*/
+    static StaticQueue_t ClockQueuePtr;
+    static StaticQueue_t HeartbeatQueuePtr;
+    static StaticQueue_t DisplayQueuePtr;
+
+    /*Queue internal buffers*/
+    static ApplicationMsg_t ClockMsgBuffer[ CLOCK_MSG_BUFFER_SIZE ];
+    static ApplicationMsg_t HeartbeatMsgBuffer[ HEARTBEAT_MSG_BUFFER_SIZE ];
+    static ApplicationMsg_t DisplayMsgBuffer[ DISPLAY_MSG_BUFFER_SIZE ];
+
     /*Initialize their STM32CubeG0 library*/
     HAL_Init( );
+
+    /*init queue to sincronize serial with clock event machines*/
+    ClockQueue = Queue_CreateStatic( CLOCK_MSG_BUFFER_SIZE, sizeof( ApplicationMsg_t ), (uint8_t *)ClockMsgBuffer, &ClockQueuePtr );
+    /*init queue to sincronize clock with display event machines*/
+    HeartbeatQueue = Queue_CreateStatic( HEARTBEAT_MSG_BUFFER_SIZE, sizeof( ApplicationMsg_t ), (uint8_t *)HeartbeatMsgBuffer, &HeartbeatQueuePtr );
+    /*init queue to sincronize serial with heartbeat event machines*/
+    DisplayQueue = Queue_CreateStatic( DISPLAY_MSG_BUFFER_SIZE, sizeof( ApplicationMsg_t ), (uint8_t *)DisplayMsgBuffer, &DisplayQueuePtr );
 
     /*Register tasks to run*/
     Task_CreateStatic( Task_10ms, "10ms task", TASK_10MS_STACK_SIZE, (void *)&Period_10ms, 4u, StackBuffer_10ms, &StackPtr_10ms );
@@ -82,7 +133,7 @@ int main( void )
     /*Run the scheduler*/
     Task_StartScheduler( );
 
-    /*Code should never reach this point, otherwise th rtos has been failed due to stack overflow
+    /*Code should never reach this point, otherwise the rtos has been failed due to stack overflow
     or a missconfiguration*/
     return 0u;
 }
@@ -133,7 +184,7 @@ static void Task_50ms( void *Parameters )
     TickType_t LastWakeTime;
     const TickType_t SleepTime = pdMS_TO_TICKS( *(TickType_t *)Parameters );
 
-    /*place here application task initilization*/
+    /*Place here application task initilization*/
     LastWakeTime = Task_GetTickCount( );
 
     for( ;; )
