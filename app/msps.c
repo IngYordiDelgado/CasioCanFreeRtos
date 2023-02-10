@@ -41,11 +41,11 @@ void HAL_MspInit( void )
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
     RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM            = RCC_PLLM_DIV1;  //fVCO = fPLLIN x ( N / M ) = 16MHz x (N / 1)
-    RCC_OscInitStruct.PLL.PLLN            = 8;  //16MHz x (8 / 1) = 128MHz
-    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2;  //fPLLP = fVCO / P = 128MHz / 2 = 64MHz
-    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV2;  //fPLLQ = fVCO / Q = 128MHz / 2 = 64MHz
-    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2;  //fPLLR = fVCO / R = 128MHz / 2 = 64MHz
+    RCC_OscInitStruct.PLL.PLLM            = RCC_PLLM_DIV1; // fVCO = fPLLIN x ( N / M ) = 16MHz x (N / 1)
+    RCC_OscInitStruct.PLL.PLLN            = 8;             // 16MHz x (8 / 1) = 128MHz
+    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2; // fPLLP = fVCO / P = 128MHz / 2 = 64MHz
+    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV2; // fPLLQ = fVCO / Q = 128MHz / 2 = 64MHz
+    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2; // fPLLR = fVCO / R = 128MHz / 2 = 64MHz
     HAL_RCC_OscConfig( &RCC_OscInitStruct );
 
     /** Initializes the CPU, AHB and APB buses clocks*/
