@@ -16,53 +16,71 @@
  */
 /* cppcheck-suppress misra-c2012-8.4 ; its external linkage is declared at HAL library */
 
-FDCAN_HandleTypeDef CANHandler;
-SPI_HandleTypeDef SpiHandle; /*estructura para manejar el spi*/
-
 void HAL_MspInit( void )
 {
-    HAL_Init( ); /* Inicializamos libreria HAL */
+    RCC_OscInitTypeDef RCC_OscInitStruct         = { 0 };
+    RCC_ClkInitTypeDef RCC_ClkInitStruct         = { 0 };
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = { 0 };
 
-    /* Declaramos las opciones para configurar el modulo FDCAN1 para transmitir al bus CAN a 100Kbps
-     y sample point de 75%, la frecuencia con la que el modulo de CAN se alimenta es
-     fCAN = fHSI / CANHandler.Init.ClockDivider / CANHandler.Init.NominalPrescaler
-     fCAN = 16MHz / 1 / 10 = 1.6Mhz
-     El numero de time qantas requerido es
-     Ntq = fCAN / CANbaudrate
-     Ntq = 1.6Mhz / 100Kbps = 16
-     EL porcentaje de sample point es
-     Sp = ( CANHandler.Init.NominalTimeSeg1 +  1 / Ntq ) * 100
-     Sp = ( ( 11 + 1 ) / 16 ) * 100 = 75%*/
-    CANHandler.Instance                  = FDCAN1;
-    CANHandler.Init.Mode                 = FDCAN_MODE_NORMAL;
-    CANHandler.Init.FrameFormat          = FDCAN_FRAME_CLASSIC;
-    CANHandler.Init.ClockDivider         = FDCAN_CLOCK_DIV1;
-    CANHandler.Init.TxFifoQueueMode      = FDCAN_TX_FIFO_OPERATION;
-    CANHandler.Init.AutoRetransmission   = DISABLE;
-    CANHandler.Init.TransmitPause        = DISABLE;
-    CANHandler.Init.ProtocolException    = DISABLE;
-    CANHandler.Init.ExtFiltersNbr        = 0;
-    CANHandler.Init.StdFiltersNbr        = 0;
-    CANHandler.Init.NominalPrescaler     = 10;
-    CANHandler.Init.NominalSyncJumpWidth = 1;
-    CANHandler.Init.NominalTimeSeg1      = 11;
-    CANHandler.Init.NominalTimeSeg2      = 4;
-    HAL_FDCAN_Init( &CANHandler );
-    /* Change FDCAN instance from initialization mode to normal mode */
-    HAL_FDCAN_Start( &CANHandler );
+    __HAL_RCC_SYSCFG_CLK_ENABLE( );
+    __HAL_RCC_PWR_CLK_ENABLE( );
 
-    /*Configuramos al spi en modo maestro, comunicacion full-duplex, polaridad del reloj en alto y fase en flanco de bajada */
-    SpiHandle.Instance            = SPI2;
-    SpiHandle.Init.Mode           = SPI_MODE_MASTER;
-    SpiHandle.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_16;    //16MHz / 16 = 1MHz
-    SpiHandle.Init.Direction      = SPI_DIRECTION_2LINES;
-    SpiHandle.Init.CLKPhase       = SPI_PHASE_2EDGE;
-    SpiHandle.Init.CLKPolarity    = SPI_POLARITY_HIGH;
-    SpiHandle.Init.DataSize       = SPI_DATASIZE_8BIT;
-    SpiHandle.Init.FirstBit       = SPI_FIRSTBIT_MSB;
-    SpiHandle.Init.NSS            = SPI_NSS_SOFT;
-    SpiHandle.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLED;
-    SpiHandle.Init.TIMode         = SPI_TIMODE_DISABLED;
-    /* aplicamos la configuracion al spi 1 pero antes nos aseguramos que el esclavo este deshabilitado pin C8 en alto*/
-    HAL_SPI_Init( &SpiHandle );
+    /** Configure the main internal regulator output voltage*/
+    HAL_PWREx_ControlVoltageScaling( PWR_REGULATOR_VOLTAGE_SCALE1 );
+
+    /* Initializes the RCC Oscillators according to the specified parameters in the RCC_OscInitTypeDef structure
+    The frequency set is 64MHz with the internal 16MHz HSI oscilator. According to the formulas:
+    fVCO = fPLLIN x ( N / M ) = 16MHz x (8 / 1) = 128MHz
+    fPLLP = fVCO / P = 128MHz / 2 = 64MHz
+    fPLLQ = fVCO / Q = 128MHz / 2 = 64MHz
+    fPLLR = fVCO / R = 128MHz / 2 = 64MHz
+    */
+    RCC_OscInitStruct.OscillatorType      = RCC_OSCILLATORTYPE_HSI;
+    RCC_OscInitStruct.HSIState            = RCC_HSI_ON;
+    RCC_OscInitStruct.HSIDiv              = RCC_HSI_DIV1;
+    RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+    RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
+    RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_HSI;
+    RCC_OscInitStruct.PLL.PLLM            = RCC_PLLM_DIV1;  //fVCO = fPLLIN x ( N / M ) = 16MHz x (N / 1)
+    RCC_OscInitStruct.PLL.PLLN            = 8;  //16MHz x (8 / 1) = 128MHz
+    RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2;  //fPLLP = fVCO / P = 128MHz / 2 = 64MHz
+    RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV2;  //fPLLQ = fVCO / Q = 128MHz / 2 = 64MHz
+    RCC_OscInitStruct.PLL.PLLR            = RCC_PLLR_DIV2;  //fPLLR = fVCO / R = 128MHz / 2 = 64MHz
+    HAL_RCC_OscConfig( &RCC_OscInitStruct );
+
+    /** Initializes the CPU, AHB and APB buses clocks*/
+    RCC_ClkInitStruct.ClockType      = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1;
+    RCC_ClkInitStruct.SYSCLKSource   = RCC_SYSCLKSOURCE_PLLCLK;
+    RCC_ClkInitStruct.AHBCLKDivider  = RCC_SYSCLK_DIV1; // 64MHz/1 = 64MHz
+    RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;   // 64MHz/1 = 64MHz
+    HAL_RCC_ClockConfig( &RCC_ClkInitStruct, FLASH_LATENCY_2 );
+
+    // ENABLE LSE CLOCK
+    /*Enable backup domain*/
+    HAL_PWREx_ControlVoltageScaling( PWR_REGULATOR_VOLTAGE_SCALE1 );
+    HAL_PWR_EnableBkUpAccess( );
+    __HAL_RCC_LSEDRIVE_CONFIG( RCC_LSEDRIVE_LOW );
+
+    /*reset previous RTC source clock*/
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+    PeriphClkInitStruct.RTCClockSelection    = RCC_RTCCLKSOURCE_NONE;
+    HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct );
+
+    /* Configure LSE/LSI as RTC clock source */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_LSE;
+    RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_NONE;
+    RCC_OscInitStruct.LSEState       = RCC_LSE_ON;  // ON external oscillator LSE 32.768 KHz
+    RCC_OscInitStruct.LSIState       = RCC_LSI_OFF; // OFF internal oscillator LSI 32 KHz
+    HAL_RCC_OscConfig( &RCC_OscInitStruct );
+
+    /*Set LSE as source clock*/
+    PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+    HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct );
+
+    /* Peripheral clock enable */
+    __HAL_RCC_RTC_ENABLE( );
+    __HAL_RCC_RTCAPB_CLK_ENABLE( );
+
+    HAL_RCC_MCOConfig( RCC_MCO1, RCC_MCO1SOURCE_LSE, RCC_MCODIV_1 ); // MCO output PIN conf. Logic analizer: 24 MHz
+                                                                     // fLSE / 2 = 32.768 MHz / 2 = 16.384 MHz
 }
