@@ -28,7 +28,7 @@
  * LSE external cristal is set as source clock after turning off the internal oscillator.
  */
 
+/* cppcheck-suppress misra-c2012-8.4 ; its external linkage is declared at HAL library */
 void HAL_MspInit( void )
 {
-    
 }
