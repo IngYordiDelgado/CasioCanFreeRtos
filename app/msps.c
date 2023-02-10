@@ -5,20 +5,22 @@
  * This is where the CPU clock frequency is set at 64MHz, this making use from the internal oscillator
  * HSI 16 MHz, also the AHB and APB busses are set to 64MHz and an extern oscillator LSE is set to feed
  * the RTC. A MCO output is set to be measure with a 24MHz logic analyzer.
- * 
+ *
  */
 #include "bsp.h"
 
 /**
  * @brief   **HAL library call-back function**
  *
- * This is a call-back function called by the stm32g0xx HAL library that runs when the HAL_Init function is 
+ * This is a call-back function called by the stm32g0xx HAL library that runs when the HAL_Init function is
  * also called, this is where the application should set the CPU frequency using the predefined HAL functions.
  * This is where the CPU clock frequency is set at 64 MHz using the internal HSI 16 MHz RC Oscillator.
  * Also the AHB and APB busses are set to work at 64MHz.
  * LSE is set to feed the RTC with an external 32.768 KHz cristal on a different clock domain.
  * MCO output is set to be suitable to be measure by a 24 MHz logic analizer.
  */
+
+void HAL_MspInit( void );
 
 void HAL_MspInit( void )
 {
@@ -47,7 +49,7 @@ void HAL_MspInit( void )
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
     RCC_OscInitStruct.PLL.PLLState        = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource       = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM            = RCC_PLLM_DIV1; /* fVCO = fPLLIN x ( N / M ) = 16MHz x (N / 1) */ 
+    RCC_OscInitStruct.PLL.PLLM            = RCC_PLLM_DIV1; /* fVCO = fPLLIN x ( N / M ) = 16MHz x (N / 1) */
     RCC_OscInitStruct.PLL.PLLN            = 8;             /* 16MHz x (8 / 1) = 128MHz */
     RCC_OscInitStruct.PLL.PLLP            = RCC_PLLP_DIV2; /* fPLLP = fVCO / P = 128MHz / 2 = 64MHz */
     RCC_OscInitStruct.PLL.PLLQ            = RCC_PLLQ_DIV2; /* fPLLQ = fVCO / Q = 128MHz / 2 = 64MHz */
@@ -74,7 +76,7 @@ void HAL_MspInit( void )
     /* Configure LSE as RTC clock source */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI | RCC_OSCILLATORTYPE_LSE;
     RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_NONE;
-    RCC_OscInitStruct.LSEState       = RCC_LSE_ON;  /* ON external oscillator LSE 32.768 KHz*/ 
+    RCC_OscInitStruct.LSEState       = RCC_LSE_ON;  /* ON external oscillator LSE 32.768 KHz*/
     RCC_OscInitStruct.LSIState       = RCC_LSI_OFF; /* OFF internal oscillator LSI 32 KHz */
     HAL_RCC_OscConfig( &RCC_OscInitStruct );
 
@@ -87,6 +89,6 @@ void HAL_MspInit( void )
     __HAL_RCC_RTCAPB_CLK_ENABLE( );
 
     /* MCO output PIN configuration function. Logic analizer: 24 MHz */
-    /* SysClk / 2 = 64 MHz / 4 = 16 MHz */ 
+    /* SysClk / 2 = 64 MHz / 4 = 16 MHz */
     HAL_RCC_MCOConfig( RCC_MCO1, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_4 );
 }
