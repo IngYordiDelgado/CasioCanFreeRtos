@@ -29,6 +29,37 @@
     /**
       @} */
 
+    /** 
+      * @defgroup RTC-redefinitions the remaining of the functions is to complain with the project 
+      *           coding standard
+      @{ */
+    typedef RCC_OscInitTypeDef              RccOscInit_t;                   /*!< Oscillator config structure */
+    typedef RCC_ClkInitTypeDef              RccClkInit_t;                   /*!< Clock config structure */
+    typedef RCC_PeriphCLKInitTypeDef        RccPeriphClkInit_t;             /*!< Peripheral clk config structure */
+
+    #define Rcc_OscConfig                   HAL_RCC_OscConfig               /*!< Oscillator configuration */
+    #define Rcc_ClockConfig                 HAL_RCC_ClockConfig             /*!< Clock configuration */
+    #define Rcc_McoConfig                   HAL_RCC_MCOConfig               /*!< Mco pin configuration */
+    #define Rcc_PeriphClkConfig             HAL_RCCEx_PeriphCLKConfig       /*!< Peripheral clocks */
+
+    #define Pwr_EnableBkUpAccess            HAL_PWR_EnableBkUpAccess        /*!< Enable backup  */
+    #define Pwr_ControlVoltageScaling       HAL_PWREx_ControlVoltageScaling /*!< Voltage scaling */
+
+    typedef GPIO_InitTypeDef                GpioHandle_t;                   /*!< Gpio config handler */
+
+    #define Gpio_Init                       HAL_GPIO_Init                   /*!< Init GPIOs */
+    /**
+      @} */
+
+    /** 
+      * @defgroup Application-Pins pins that will be used by the appllication to interface the
+      *             external peripherals
+      @{ */
+    #define MCO_PIN                         GPIO_PIN_8  /*!< Output for the sysclock */
+    #define MCO_PORT                        GPIOA       /*!< Port where the MCO pin is located */
+    /**
+      @} */
+
     /**
      * @brief   time and date structure
      */
