@@ -340,9 +340,8 @@ void Clock_Task( void )
   };
   APP_Display_MsgTypeDef  msg_struct  = {0};
   Clock_Events_TypeDef    Event;    
-  while(uxQueueMessagesWaiting(ClockQueue) > 0u )
+  while( xQueueReceive(ClockQueue,&msg_struct,portMAX_DELAY) )
   {
-    xQueueReceive(ClockQueue,&msg_struct,portMAX_DELAY);
     Event = msg_struct.msg;
     if(Event < CLOCK_LAST)
     {

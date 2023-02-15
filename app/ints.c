@@ -9,7 +9,8 @@
  * Vector definitions as week functions can be found at file **startup_stm32g0b1xx.s**
  */
 #include "bsp.h"
-
+#include "serial.h"
+#include "clock.h"
 /**
  * @brief   **Non Maskable Interrupt vector**
  *
@@ -54,4 +55,31 @@ void SysTick_Handler( void )
     }
     /*Increment the STM32CubeG0 library tick*/
     HAL_IncTick( );
+}
+/**------------------------------------------------------------------------------------------------
+Brief.- Punto de entrada del programa
+-------------------------------------------------------------------------------------------------*/
+void EXTI4_15_IRQHandler( void )
+{
+    /*funcion que realiza las operaciones de interrupcion del gpio*/
+    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_7 );
+}
+
+
+void TIM16_FDCAN_IT0_IRQHandler( void )
+{
+
+    HAL_FDCAN_IRQHandler( &CANHandler );
+}
+
+
+void RTC_TAMP_IRQHandler( void )
+{
+    /* USER CODE BEGIN RTC_TAMP_IRQn 0 */
+
+    /* USER CODE END RTC_TAMP_IRQn 0 */
+    HAL_RTC_AlarmIRQHandler( &hrtc );
+    /* USER CODE BEGIN RTC_TAMP_IRQn 1 */
+
+    /* USER CODE END RTC_TAMP_IRQn 1 */
 }

@@ -8,7 +8,7 @@
  *
  */
 #include "bsp.h"
-
+#include "lcd.h"
 /**
  * @brief   **HAL library call-back function**
  *
@@ -98,4 +98,117 @@ void HAL_MspInit( void )
     Gpio_Init( MCO_PORT, &McoInitStruct );
     /* SysClk / 2 = 64 MHz / 64 = 1 MHz */
     Rcc_McoConfig( RCC_MCO1, RCC_MCO1SOURCE_SYSCLK, RCC_MCODIV_64 );
+}
+/**
+ * @brief  Configure the Gpio resources used for can communication
+ */
+void HAL_FDCAN_MspInit( FDCAN_HandleTypeDef *hfdcan )
+{
+    (void)hfdcan;
+    GPIO_InitTypeDef GpioCanStruct;
+
+
+    __HAL_RCC_FDCAN_CLK_ENABLE( );
+    __HAL_RCC_GPIOD_CLK_ENABLE( );
+
+    GpioCanStruct.Mode      = GPIO_MODE_AF_PP;
+    GpioCanStruct.Alternate = GPIO_AF3_FDCAN1;
+    GpioCanStruct.Pin       = GPIO_PIN_0 | GPIO_PIN_1;
+    GpioCanStruct.Pull      = GPIO_NOPULL;
+    GpioCanStruct.Speed     = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init( GPIOD, &GpioCanStruct );
+    HAL_NVIC_SetPriority( TIM16_FDCAN_IT0_IRQn, 2, 1 );
+    HAL_NVIC_EnableIRQ( TIM16_FDCAN_IT0_IRQn );
+}
+
+/**
+ * @brief  Makes the necessary configuration to use the rtc
+ */
+void HAL_RTC_MspInit( RTC_HandleTypeDef *rtc )
+{
+    (void)rtc;
+    RCC_OscInitTypeDef RCC_OscInitStruct         = { 0 };
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = { 0 };
+
+    __HAL_RCC_SYSCFG_CLK_ENABLE( );
+    __HAL_RCC_PWR_CLK_ENABLE( );
+
+    /*Eanlble backup domain*/
+    HAL_PWREx_ControlVoltageScaling( PWR_REGULATOR_VOLTAGE_SCALE1 );
+    HAL_PWR_EnableBkUpAccess( );
+    __HAL_RCC_LSEDRIVE_CONFIG( RCC_LSEDRIVE_LOW );
+
+    /*reset previous RTC source clock*/
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+    PeriphClkInitStruct.RTCClockSelection    = RCC_RTCCLKSOURCE_NONE;
+    HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct );
+
+    /* Configure LSE/LSI as RTC clock source */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE;
+    RCC_OscInitStruct.PLL.PLLState   = RCC_PLL_NONE;
+    RCC_OscInitStruct.LSEState       = RCC_LSE_ON;
+    RCC_OscInitStruct.LSIState       = RCC_LSI_OFF;
+    HAL_RCC_OscConfig( &RCC_OscInitStruct );
+
+    /*Set LSE as source clock*/
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+    PeriphClkInitStruct.RTCClockSelection    = RCC_RTCCLKSOURCE_LSE;
+    HAL_RCCEx_PeriphCLKConfig( &PeriphClkInitStruct );
+
+    /* Peripheral clock enable */
+    __HAL_RCC_RTC_ENABLE( );
+    __HAL_RCC_RTCAPB_CLK_ENABLE( );
+    HAL_NVIC_SetPriority( RTC_TAMP_IRQn, 0, 0 );
+    HAL_NVIC_EnableIRQ( RTC_TAMP_IRQn );
+}
+void HAL_SPI_MspInit( SPI_HandleTypeDef *hspi )
+{
+    (void)hspi;
+    /*pines B13, B14 y B15 en funcion alterna spi1 */
+    GPIO_InitTypeDef GPIO_InitStruct;
+    __GPIOB_CLK_ENABLE( );
+    __SPI2_CLK_ENABLE( );
+    GPIO_InitStruct.Pin       = GPIO_PIN_13 | GPIO_PIN_11;
+    GPIO_InitStruct.Mode      = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull      = GPIO_PULLUP;
+    GPIO_InitStruct.Speed     = GPIO_SPEED_FREQ_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF0_SPI2;
+    HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
+}
+
+void HEL_LCD_MspInit( LCD_HandleTypeDef *hlcd ) /* cppcheck-suppress misra-c2012-8.6 ; Bug with weekly linked fuctions this is a false/positive */
+{
+    (void)hlcd;
+    __GPIOC_CLK_ENABLE( );
+    __GPIOB_CLK_ENABLE( );
+    GPIO_InitTypeDef GPIO_InitStruct; /* Structure for GPIO initialization*/
+    GPIO_InitStruct.Pin   = GPIO_PIN_9 | GPIO_PIN_8 | GPIO_PIN_12;
+    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull  = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init( GPIOC, &GPIO_InitStruct );
+    GPIO_InitStruct.Pin   = GPIO_PIN_15;
+    GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull  = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init( GPIOB, &GPIO_InitStruct );
+    HAL_GPIO_WritePin( GPIOB, GPIO_PIN_15, SET );
+    HAL_GPIO_WritePin( GPIOC, GPIO_PIN_12, RESET );
+    HAL_GPIO_WritePin( GPIOC, GPIO_PIN_9, SET );
+    HAL_GPIO_WritePin( GPIOC, GPIO_PIN_8, SET );
+}
+
+void HAL_WWDG_MspInit( WWDG_HandleTypeDef *hwwdg )
+{
+    if( hwwdg->Instance == WWDG )
+    {
+        /* USER CODE BEGIN WWDG_MspInit 0 */
+
+        /* USER CODE END WWDG_MspInit 0 */
+        /* Peripheral clock enable */
+        __HAL_RCC_WWDG_CLK_ENABLE( );
+        /* USER CODE BEGIN WWDG_MspInit 1 */
+
+        /* USER CODE END WWDG_MspInit 1 */
+    }
 }

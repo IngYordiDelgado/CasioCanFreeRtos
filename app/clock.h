@@ -8,8 +8,8 @@
 * @date 01/04/2023
 */
 
-#ifndef APP_CLOCK_H__
-#define APP_CLOCK_H__
+#ifndef CLOCK_H__
+#define CLOCK_H__
 
   #include "bsp.h"
   #include "timers.h"

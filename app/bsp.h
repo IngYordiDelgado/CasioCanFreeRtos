@@ -75,6 +75,12 @@
         uint32_t tm_yday;        /*!< day in the year, range 0 to 365  */
         uint32_t tm_isdst;       /*!< daylight saving time             */
     } ApplicationTm_t;
+    
+    /* Definitions for custom micro delay */
+    extern TIM_HandleTypeDef TIM6_Handler;    
+    void Delay_us_Init(void);
+    void Delay_us(uint16_t delay);
+
 
     /**
      * @brief   Application message structure
