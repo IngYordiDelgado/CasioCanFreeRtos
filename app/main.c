@@ -16,6 +16,7 @@
  * deadlines of 10, 50 and 100ms
  */
 #include "bsp.h"
+#include "clock.h"
 
 /**
   * @defgroup Task-Stacks RTOS task stack size in words (4 bytes)
@@ -186,10 +187,11 @@ static void Task_50ms( void *Parameters )
 
     /*Place here application task initilization*/
     LastWakeTime = Task_GetTickCount( );
-
+    Clock_Init( );
     for( ;; )
     {
         /*Place here application periodic tasks*/
+        Clock_Task( );
         Task_DelayUntil( &LastWakeTime, SleepTime );
     }
 }

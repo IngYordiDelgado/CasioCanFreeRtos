@@ -24,7 +24,7 @@
     #define Task_StartScheduler             vTaskStartScheduler     /*!< Run scheduler */
     #define Task_GetTickCount               xTaskGetTickCount       /*!< Get current ticks */
     #define Task_DelayUntil                 xTaskDelayUntil         /*!< Block task */
-
+    
     #define Queue_CreateStatic              xQueueCreateStatic      /*!< Create queue */
     /**
       @} */
