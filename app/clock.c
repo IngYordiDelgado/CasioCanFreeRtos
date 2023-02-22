@@ -17,7 +17,7 @@
 
 
 
-static TimerHandle_t AlarmActive_TimerHandler;
+
 
 static uint8_t AlarmSet          = FALSE;
 static uint8_t AlarmActive       = FALSE;
@@ -50,13 +50,10 @@ void HAL_GPIO_EXTI_Rising_Callback( uint16_t GPIO_Pin )
   (void) GPIO_Pin;
   BtnPush = FALSE;
   DisplayAlarm_Run = FALSE;
+  vTaskResume(DisplayTaskHandler);
 }
 
-void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *rtc)
-{
-  (void)rtc;
-  AlarmActive = TRUE;
-}
+
 
 
 static void Clock_DisplayAlarm(APP_Display_MsgTypeDef *msg_struct)
@@ -68,12 +65,14 @@ static void Clock_DisplayAlarm(APP_Display_MsgTypeDef *msg_struct)
   msg_struct->Alarm_set = AlarmSet;
   if(!AlarmSet)
    {
+      (void)memset(msg_struct,0,sizeof(msg_struct));
       Display_Event = DISPLAY_ALARM_NOSET;
       msg_struct->msg = Display_Event;
       xQueueSend( DisplayQueue, ( void * ) msg_struct, ( TickType_t ) 0 );
    }
    else
    {
+      (void)memset(msg_struct,0,sizeof(msg_struct));
       Display_Event = DISPLAY_ALARM_SET;
       msg_struct->msg = Display_Event;
       xQueueSend( DisplayQueue, ( void * ) msg_struct, ( TickType_t ) 0 );
@@ -88,14 +87,19 @@ static void RunAlarm(void)
   {
     HAL_GPIO_TogglePin(GPIOB,BUZZER);
     i++;
-    xTimerStart(AlarmActive_TimerHandler,0);
   }
   else
   {
+    i=0;
     Internal_Event = CLOCK_ALARM_DEACTIVATE;
     msg_struct.msg = Internal_Event;
     xQueueSend( ClockQueue, ( void * ) &msg_struct, ( TickType_t ) 0 );
   }
+}
+void HAL_RTC_AlarmAEventCallback(RTC_HandleTypeDef *rtc)
+{
+  (void)rtc;
+  AlarmActive = TRUE;
 }
 
 void Display_TimerCallback(TimerHandle_t xTimer)
@@ -115,16 +119,16 @@ void Display_TimerCallback(TimerHandle_t xTimer)
 
 void AlarmActive_TimerCallBack( TimerHandle_t xTimer)
 {
-  (void)xTimer;
   APP_MsgTypeDef  msg_struct  = {0};
   Clock_Events_TypeDef    Internal_Event =  CLOCK_MSG_NONE;
   if( AlarmActive == TRUE )
   {
     Internal_Event = CLOCK_ALARM_ACTIVATE;
     msg_struct.msg = Internal_Event;
-    xQueueSend( ClockQueue, ( void * ) &msg_struct, ( TickType_t ) 0 );
-  } 
+    (void)xQueueSend(ClockQueue,(void *)&msg_struct,0);      
+  }
 }
+
 
 /**
  * @brief This is the structure to store all rtc clock configuration parameters.
@@ -304,9 +308,11 @@ void Clock_Init( void )
   HAL_NVIC_EnableIRQ( EXTI4_15_IRQn );
   /* Create timer to update display every second */
   TimerHandle_t DisplayTimerHandler;
+  TimerHandle_t AlarmTimerHandler;
   DisplayTimerHandler = xTimerCreate("DisplayTimer",DISPLAY_TIMER_PERIOD,TRUE,0,Display_TimerCallback);
-  AlarmActive_TimerHandler = xTimerCreate("AlarmActive_Timer",DISPLAY_TIMER_PERIOD,FALSE,0,AlarmActive_TimerCallBack);
+  AlarmTimerHandler   =  xTimerCreate("AlarmActive_Timer",ALARM_TIMER_PERIOD,TRUE,0,AlarmActive_TimerCallBack);
   xTimerStart(DisplayTimerHandler,0);
+  xTimerStart(AlarmTimerHandler,0);
 }
 
 /**
@@ -340,7 +346,7 @@ void Clock_Task( void )
   };
   APP_Display_MsgTypeDef  msg_struct  = {0};
   Clock_Events_TypeDef    Event;    
-  while( xQueueReceive(ClockQueue,&msg_struct,portMAX_DELAY) )
+  while( xQueueReceive(ClockQueue,&msg_struct,0)  == pdTRUE )
   {
     Event = msg_struct.msg;
     if(Event < CLOCK_LAST)

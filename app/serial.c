@@ -63,7 +63,6 @@ void Serial_Init( void )
  * @brief  structure for filter configuration 
  */
   FDCAN_FilterTypeDef   CANFilter;
-  static CAN_MsgTypeDef Serial_Buffer[23];
   /*Set configuration for can module*/
   CANHandler.Instance                 = FDCAN1;
   CANHandler.Init.Mode                = FDCAN_MODE_NORMAL;
@@ -325,15 +324,16 @@ void Serial_Task( void )
     {SERIAL_OK_MSG,Ok_Msg_Acknowledge},
     {SERIAL_ERROR_MSG,Error_Msg_Acknowledge}
   };
-
-  while(xQueueReceive(HeartbeatQueue,RxData,0))
+  for(;;)
   {
-    event = RxData[1];        
-    if( event < (uint8_t)SERIAL_LAST)
+    while(xQueueReceive(HeartbeatQueue,RxData,0) == pdTRUE)
     {
-      (*Events_Machine[event].func)(RxData);
-    }
-    
-  }   
-     
+      event = RxData[1];        
+      if( event < (uint8_t)SERIAL_LAST)
+      {
+        (*Events_Machine[event].func)(RxData);
+      }
+
+    }   
+  }
 }

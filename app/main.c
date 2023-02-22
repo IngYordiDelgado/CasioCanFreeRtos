@@ -17,7 +17,12 @@
  */
 #include "bsp.h"
 #include "clock.h"
+#include "display.h"
+#include "serial.h"
+#include "lcd.h"
 
+LCD_HandleTypeDef LCDHandler;
+TIM_HandleTypeDef TIM6_Handler;
 /**
   * @defgroup Task-Stacks RTOS task stack size in words (4 bytes)
   @{ */
@@ -62,7 +67,7 @@ QueueHandle_t DisplayQueue;
 /* cppcheck-suppress misra-c2012-8.7 ; eventualy this variable will be used somewhere else */
 QueueHandle_t HeartbeatQueue;
 
-
+TaskHandle_t DisplayTaskHandler;
 static void Task_10ms( void *Parameters );
 static void Task_50ms( void *Parameters );
 static void Task_100ms( void *Parameters );
@@ -112,24 +117,24 @@ int main( void )
     static StaticQueue_t DisplayQueuePtr;
 
     /*Queue internal buffers*/
-    static ApplicationMsg_t ClockMsgBuffer[ CLOCK_MSG_BUFFER_SIZE ];
+    static APP_Display_MsgTypeDef ClockMsgBuffer[ CLOCK_MSG_BUFFER_SIZE ];
     static ApplicationMsg_t HeartbeatMsgBuffer[ HEARTBEAT_MSG_BUFFER_SIZE ];
-    static ApplicationMsg_t DisplayMsgBuffer[ DISPLAY_MSG_BUFFER_SIZE ];
+    static APP_Display_MsgTypeDef DisplayMsgBuffer[ DISPLAY_MSG_BUFFER_SIZE ];
 
     /*Initialize their STM32CubeG0 library*/
     HAL_Init( );
 
     /*init queue to sincronize serial with clock event machines*/
-    ClockQueue = Queue_CreateStatic( CLOCK_MSG_BUFFER_SIZE, sizeof( ApplicationMsg_t ), (uint8_t *)ClockMsgBuffer, &ClockQueuePtr );
+    ClockQueue = Queue_CreateStatic( CLOCK_MSG_BUFFER_SIZE, sizeof( APP_Display_MsgTypeDef ), (uint8_t *)ClockMsgBuffer, &ClockQueuePtr );
     /*init queue to sincronize clock with display event machines*/
     HeartbeatQueue = Queue_CreateStatic( HEARTBEAT_MSG_BUFFER_SIZE, sizeof( ApplicationMsg_t ), (uint8_t *)HeartbeatMsgBuffer, &HeartbeatQueuePtr );
     /*init queue to sincronize serial with heartbeat event machines*/
-    DisplayQueue = Queue_CreateStatic( DISPLAY_MSG_BUFFER_SIZE, sizeof( ApplicationMsg_t ), (uint8_t *)DisplayMsgBuffer, &DisplayQueuePtr );
+    DisplayQueue = Queue_CreateStatic( DISPLAY_MSG_BUFFER_SIZE, sizeof( APP_Display_MsgTypeDef ), (uint8_t *)DisplayMsgBuffer, &DisplayQueuePtr );
 
     /*Register tasks to run*/
     Task_CreateStatic( Task_10ms, "10ms task", TASK_10MS_STACK_SIZE, (void *)&Period_10ms, 4u, StackBuffer_10ms, &StackPtr_10ms );
     Task_CreateStatic( Task_50ms, "50ms task", TASK_50MS_STACK_SIZE, (void *)&Period_50ms, 3u, StackBuffer_50ms, &StackPtr_50ms );
-    Task_CreateStatic( Task_100ms, "100ms task", TASK_100MS_STACK_SIZE, (void *)&Period_100ms, 2u, StackBuffer_100ms, &StackPtr_100ms );
+    DisplayTaskHandler = Task_CreateStatic( Task_100ms, "100ms task", TASK_100MS_STACK_SIZE, (void *)&Period_100ms, 2u, StackBuffer_100ms, &StackPtr_100ms );
 
     /*Run the scheduler*/
     Task_StartScheduler( );
@@ -158,10 +163,12 @@ static void Task_10ms( void *Parameters )
 
     /*place here application task initilization*/
     LastWakeTime = Task_GetTickCount( );
+    Serial_Init( );
 
     for( ;; )
     {
         /*Place here application periodic tasks*/
+        Serial_Task( );
         Task_DelayUntil( &LastWakeTime, SleepTime );
     }
 }
@@ -215,10 +222,12 @@ static void Task_100ms( void *Parameters )
 
     /*place here application task initilization*/
     LastWakeTime = Task_GetTickCount( );
+    display_Init( );
 
     for( ;; )
     {
         /*Place here application periodic tasks*/
+        display_Task( );
         Task_DelayUntil( &LastWakeTime, SleepTime );
     }
 }
